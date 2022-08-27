@@ -1,6 +1,4 @@
-﻿using System.Xml.Linq;
-
-namespace MyWebSurver.Http
+﻿namespace MyWebSurver.Http
 {
     public class HttpRequest
     {

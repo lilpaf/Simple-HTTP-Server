@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,7 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Views\Animals\Dogs.cshtm" />
+    <None Remove="Views\Animals\Dogs.cshtml" />
+    <None Remove="Views\Animals\Rabbits.cshtml" />
+    <None Remove="Views\Animals\Wild\Turtles.cshtml" />
   </ItemGroup>
 
   <ItemGroup>

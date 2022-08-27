@@ -1,11 +1,11 @@
-﻿using MyWebSurver.Http;
-using MyWebSurver.Routing;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-
-namespace MyWebServer
+﻿namespace MyWebServer
 {
+    using MyWebSurver.Http;
+    using MyWebSurver.Routing;
+    using System.Net;
+    using System.Net.Sockets;
+    using System.Text;
+
     public class HttpServer
     {
         private readonly IPAddress ipAddress;

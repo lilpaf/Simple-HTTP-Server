@@ -1,8 +1,7 @@
-﻿using MyWebSurver.Common;
-using static System.Net.Mime.MediaTypeNames;
-
-namespace MyWebSurver.Http
+﻿namespace MyWebSurver.Http
 {
+    using MyWebSurver.Common;
+
     public class HttpHeader
     {
         public HttpHeader(string name, string value)

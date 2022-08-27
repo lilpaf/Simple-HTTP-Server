@@ -1,7 +1,8 @@
-﻿using System.Text;
-
-namespace MyWebSurver.Http
+﻿namespace MyWebSurver.Http
 {
+    using MyWebSurver.Common;
+    using System.Text;
+
     public abstract class HttpResponse
     {
         public HttpResponse(HttpStatusCode statusCode)
@@ -16,7 +17,7 @@ namespace MyWebSurver.Http
 
         public HttpHeaderCollection Headers => new HttpHeaderCollection();
 
-        public string Content { get; init; }
+        public string Content { get; protected set; }
 
         public override string ToString()
         {
@@ -37,6 +38,17 @@ namespace MyWebSurver.Http
             }
 
             return result.ToString();
+        }
+
+        protected void PrepareContent(string content, string contentType)
+        {
+            Guard.AgainstNull(content, nameof(content));
+            Guard.AgainstNull(contentType, nameof(contentType));
+
+            this.Headers.Add("Content-Type", contentType);
+            this.Headers.Add("Content-Length", $"{Encoding.UTF8.GetByteCount(content)}");
+
+            this.Content = content;
         }
     }
 }

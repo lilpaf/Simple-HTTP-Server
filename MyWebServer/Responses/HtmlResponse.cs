@@ -1,10 +1,10 @@
 ﻿namespace MyWebSurver.Responses
 {
-    using MyWebSurver.Results;
+    using MyWebSurver.Http;
 
     public class HtmlResponse : ContentResponse
     {
-        public HtmlResponse(string html) : base(html, "text/html; charset=UTF-8")
+        public HtmlResponse(string html) : base(html, HttpContentType.Html)
         {
         }
     }

@@ -1,5 +1,4 @@
-﻿
-namespace MyWebSurver.Http
+﻿namespace MyWebSurver.Http
 {
     public enum HttpMethod
     {

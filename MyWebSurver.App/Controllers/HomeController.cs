@@ -1,8 +1,6 @@
 ﻿namespace MyWebSurver.Controllers
 {
     using MyWebSurver.Http;
-    using MyWebSurver.Results;
-    using MyWebSurver.Controllers;
 
     public class HomeController : Controller
     {

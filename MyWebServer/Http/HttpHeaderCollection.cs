@@ -1,8 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-
-namespace MyWebSurver.Http
+﻿namespace MyWebSurver.Http
 {
+    using System.Collections;
+
     public class HttpHeaderCollection : IEnumerable<HttpHeader>
     {
         private readonly Dictionary<string, HttpHeader> headers;
