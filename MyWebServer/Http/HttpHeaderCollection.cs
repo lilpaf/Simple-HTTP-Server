@@ -18,9 +18,6 @@
             this.headers.Add(name, header);
         }
         
-        //public void Add(string name, string value)
-        //=> this.headers[name] = new HttpHeader(name, value); 
-
         public IEnumerator<HttpHeader> GetEnumerator()
         => this.headers.Values.GetEnumerator();
 
