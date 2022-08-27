@@ -15,7 +15,7 @@
 
         public HttpStatusCode StatusCode { get; protected set; }
 
-        public HttpHeaderCollection Headers => new HttpHeaderCollection();
+        public HttpHeaderCollection Headers { get; } = new HttpHeaderCollection();
 
         public string Content { get; protected set; }
 

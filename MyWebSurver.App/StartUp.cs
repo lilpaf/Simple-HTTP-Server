@@ -1,4 +1,5 @@
 ﻿using MyWebServer;
+using MyWebSurver.App.Controllers;
 using MyWebSurver.Controllers;
 
 await new HttpServer(routes => routes
@@ -8,5 +9,6 @@ await new HttpServer(routes => routes
     .MapGet<AnimalsController>("/Cats", c => c.Cats())
     .MapGet<AnimalsController>("/Dogs", c => c.Dogs())
     .MapGet<AnimalsController>("/Bunnies", c => c.Bunnies())
-    .MapGet<AnimalsController>("/Turtles", c => c.Turtles()))
+    .MapGet<AnimalsController>("/Turtles", c => c.Turtles())
+    .MapGet<CatsController>("/Cats/Create", c => c.Create()))
     .Start();
