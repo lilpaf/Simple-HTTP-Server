@@ -50,11 +50,15 @@
 
                 Console.WriteLine(requestText);
 
-                var request = HttpRequest.Parse(requestText);
+                // This is temporary fix for browser sending blank requests
+                if (!string.IsNullOrEmpty(requestText)) 
+                {
+                    var request = HttpRequest.Parse(requestText);
 
-                var response = this.routingTable.ExecuteRequest(request);
+                    var response = this.routingTable.ExecuteRequest(request);
 
-                await WriteResponse(networkStream, response);
+                    await WriteResponse(networkStream, response);
+                }
 
                 connection.Close();
             }

@@ -10,5 +10,6 @@ await new HttpServer(routes => routes
     .MapGet<AnimalsController>("/Dogs", c => c.Dogs())
     .MapGet<AnimalsController>("/Bunnies", c => c.Bunnies())
     .MapGet<AnimalsController>("/Turtles", c => c.Turtles())
-    .MapGet<CatsController>("/Cats/Create", c => c.Create()))
+    .MapGet<CatsController>("/Cats/Create", c => c.Create())
+    .MapPost<CatsController>("/Cats/Save", c => c.Save()))
     .Start();
