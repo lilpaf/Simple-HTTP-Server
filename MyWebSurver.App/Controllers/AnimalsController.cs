@@ -1,6 +1,8 @@
 ﻿namespace MyWebSurver.Controllers
 {
+    using MyWebSurver.App.Models.Animals;
     using MyWebSurver.Http;
+    using System.Xml.Linq;
 
     public class AnimalsController : Controller
     {
@@ -12,6 +14,7 @@
         public HttpResponse Cats()
         {
             const string nameKey = "Name";
+            const string ageKey = "Age";
 
             var query = this.Request.Query;
 
@@ -19,9 +22,16 @@
             ? query[nameKey]
             : "the cats";
 
-            var result = $"<h1>Hello from {catName}!</h1>";
+            var catAge = query.ContainsKey(ageKey)
+                ? int.Parse(query[ageKey])
+            : 0;
 
-            return Html(result);
+            var viewModel = new CatViewModel{
+                Name = catName,
+                Age = catAge
+            }; 
+
+            return View(viewModel);
         }
 
         public HttpResponse Dogs() => View();
