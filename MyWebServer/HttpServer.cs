@@ -48,11 +48,11 @@
 
                 var requestText = await this.ReadRequest(networkStream);
 
-                Console.WriteLine(requestText);
-
                 // This is temporary fix for browser sending blank requests
                 if (!string.IsNullOrEmpty(requestText)) 
                 {
+                    Console.WriteLine(requestText);
+
                     var request = HttpRequest.Parse(requestText);
 
                     var response = this.routingTable.ExecuteRequest(request);
