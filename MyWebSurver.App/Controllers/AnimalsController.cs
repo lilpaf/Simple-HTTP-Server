@@ -2,7 +2,6 @@
 {
     using MyWebSurver.App.Models.Animals;
     using MyWebSurver.Http;
-    using System.Xml.Linq;
 
     public class AnimalsController : Controller
     {

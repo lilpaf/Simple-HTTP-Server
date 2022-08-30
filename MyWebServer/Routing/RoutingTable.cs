@@ -1,10 +1,8 @@
-﻿using MyWebSurver.Common;
-using MyWebSurver.Http;
-using MyWebSurver.Responses;
-using HttpMethod = MyWebSurver.Http.HttpMethod;
-
-namespace MyWebSurver.Routing
+﻿namespace MyWebSurver.Routing
 {
+    using MyWebSurver.Common;
+    using MyWebSurver.Http;
+    using HttpMethod = MyWebSurver.Http.HttpMethod;
 
     public class RoutingTable : IRoutingTable
     {
@@ -56,7 +54,7 @@ namespace MyWebSurver.Routing
             if (!this.routes.ContainsKey(requestMethod) 
                 || !this.routes[requestMethod].ContainsKey(requestPath))
             {
-                return new NotFoundResponse();
+                return new HttpResponse(HttpStatusCode.NotFound);
             }
 
             var responseFunction = this.routes[requestMethod][requestPath];

@@ -1,13 +1,13 @@
-﻿namespace MyWebSurver.Responses
+﻿namespace MyWebSurver.Results
 {
     using MyWebSurver.Http;
 
-    public class ViewResponse : HttpResponse
+    public class ViewResult : ActionResult
     {
         private const char PathSeparator = '/';
 
-        public ViewResponse(string viewPath, string controllerName, object model) 
-            : base(HttpStatusCode.OK)
+        public ViewResult(HttpResponse respose, string viewPath, string controllerName, object model) 
+            : base(respose)
         =>this.GetHtml(viewPath, controllerName, model);
         
 
