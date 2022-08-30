@@ -2,6 +2,7 @@
 {
     using MyWebSurver.Http;
     using MyWebSurver.Routing;
+    using System;
     using System.Net;
     using System.Net.Sockets;
     using System.Text;
@@ -17,7 +18,7 @@
         public HttpServer(string ipAddress, int port, Action<IRoutingTable> routingTableConfig)
         {
             this.ipAddress = IPAddress.Parse(ipAddress);
-            this.port = port; // 8080
+            this.port = port;
             listener = new TcpListener(this.ipAddress, port);
 
             routingTableConfig(this.routingTable = new RoutingTable());
@@ -27,17 +28,18 @@
             : this("127.0.0.1", port, routingTable)
         {
         }
-        
+
         public HttpServer(Action<IRoutingTable> routingTable)
             : this(5000, routingTable)
         {
         }
-       
+
 
         public async Task Start()
         {
             this.listener.Start();
 
+            Console.WriteLine($"Server started on port {port}");
             Console.WriteLine("Listening for requests...");
 
             while (true)
@@ -48,8 +50,7 @@
 
                 var requestText = await this.ReadRequest(networkStream);
 
-                // This is temporary fix for browser sending blank requests
-                if (!string.IsNullOrEmpty(requestText)) 
+                try
                 {
                     Console.WriteLine(requestText);
 
@@ -57,11 +58,31 @@
 
                     var response = this.routingTable.ExecuteRequest(request);
 
+                    this.PrepareSession(request, response);
+
+                    this.LogPipeLine(request, response);
+
                     await WriteResponse(networkStream, response);
+                }
+                catch (Exception exception)
+                {
+                    await HandleError(networkStream, exception);
                 }
 
                 connection.Close();
             }
+        }
+
+        
+        private void PrepareSession(HttpRequest request, HttpResponse response)
+        => response.AddCookie(HttpSession.SessionCookieName, request.Session.Id);
+
+        private async Task HandleError(NetworkStream networkStream, Exception exception)
+        {
+            var errorMessege = $"{exception.Message}{Environment.NewLine}{exception.StackTrace}";
+            var errorResponse = HttpResponse.ForError(errorMessege);
+
+            await WriteResponse(networkStream, errorResponse);
         }
 
         private async Task<string> ReadRequest(NetworkStream networkStream)
@@ -89,6 +110,28 @@
             while (networkStream.DataAvailable);
 
             return requestBuilder.ToString();
+        }
+
+        private void LogPipeLine(HttpRequest request, HttpResponse response)
+        {
+            var separator = new string('-', 50);
+
+            var log = new StringBuilder();
+
+            log.AppendLine();
+            log.AppendLine(separator);
+
+            log.AppendLine("REQUEST:");
+            log.AppendLine(request.ToString());
+            
+            log.AppendLine();
+
+            log.AppendLine("RESPONSE:");
+            log.AppendLine(response.ToString());
+
+            log.AppendLine();
+
+            Console.WriteLine(log);
         }
 
         private async Task WriteResponse(NetworkStream networkStream, HttpResponse response)

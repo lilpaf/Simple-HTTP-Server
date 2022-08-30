@@ -1,27 +1,29 @@
-﻿using System.Collections.Generic;
-
-namespace MyWebSurver.Http
+﻿namespace MyWebSurver.Http
 {
+
     public class HttpRequest
     {
-        private const string NewLine = "\r\n"; //Environment.NewLine
+        private static Dictionary<string, HttpSession> Sessions = new();
 
+        private const string NewLine = "\r\n"; //Environment.NewLine
 
         public HttpMethod Method { get; private set; }
 
         public string Path { get; private set; }
 
         public IReadOnlyDictionary<string, string> Query { get; private set; }
-       
-        public IReadOnlyDictionary<string, string> Form { get; private set; }
 
         public IReadOnlyDictionary<string, HttpHeader> Headers { get; private set; }
 
         public IReadOnlyDictionary<string, HttpCookie> Cookies { get; private set; }
 
+        public IReadOnlyDictionary<string, string> Form { get; private set; }
+
         public string Body { get; private set; }
 
-        public static HttpRequest Parse (string request)
+        public HttpSession Session { get; private set; }
+
+        public static HttpRequest Parse(string request)
         {
             var lines = request.Split(NewLine);
 
@@ -36,6 +38,8 @@ namespace MyWebSurver.Http
 
             var cookies = ParseCookies(headers);
 
+            var session = GetSession(cookies);
+
             var bodyLines = lines.Skip(headers.Count + 2).ToArray();
 
             var body = string.Join(NewLine, bodyLines);
@@ -49,6 +53,7 @@ namespace MyWebSurver.Http
                 Query = query,
                 Headers = headers,
                 Cookies = cookies,
+                Session = session,
                 Body = body,
                 Form = form,
             };
@@ -59,7 +64,7 @@ namespace MyWebSurver.Http
             var urlParts = url.Split('?', 2);
 
             var path = urlParts[0];
-            var query = urlParts.Length > 1 
+            var query = urlParts.Length > 1
                 ? ParseQuery(urlParts[1])
                 : new Dictionary<string, string>();
 
@@ -71,8 +76,8 @@ namespace MyWebSurver.Http
             .Split('&')
             .Select(part => part.Split('='))
             .Where(part => part.Length == 2)
-            .ToDictionary(part => part[0], part => part[1]); 
-        
+            .ToDictionary(part => part[0], part => part[1]);
+
 
         private static Dictionary<string, HttpHeader> ParseHeaders(IEnumerable<string> headerLines)
         {
@@ -86,7 +91,7 @@ namespace MyWebSurver.Http
                 }
 
                 var headerParts = headerLine.Split(":", 2);
-                
+
                 if (headerParts.Length != 2)
                 {
                     throw new InvalidOperationException("Request is not valid");
@@ -101,6 +106,20 @@ namespace MyWebSurver.Http
             return headerCollection;
         }
 
+        private static HttpSession GetSession(Dictionary<string, HttpCookie> cookies)
+        {
+            var sessionId = cookies.ContainsKey(HttpSession.SessionCookieName)
+                ? cookies[HttpSession.SessionCookieName].Value
+                : Guid.NewGuid().ToString();
+
+            if (!Sessions.ContainsKey(sessionId))
+            {
+                Sessions[sessionId] = new HttpSession(sessionId);
+            }
+
+            return Sessions[sessionId];
+        }
+
         private static Dictionary<string, HttpCookie> ParseCookies(Dictionary<string, HttpHeader> headers)
         {
             var cookieCollection = new Dictionary<string, HttpCookie>();
@@ -109,17 +128,17 @@ namespace MyWebSurver.Http
             {
                 var cookieHeader = headers[HttpHeader.Cookie];
 
-                 cookieHeader
-                    .Value
-                    .Split(';')
-                    .Select(c => c.Split('='))
-                    .Select(cp => new
-                    {
-                        Name = cp[0].Trim(),
-                        Value = cp[1].Trim()
-                    })
-                    .ToList()
-                    .ForEach(c => cookieCollection.Add(c.Name, new HttpCookie(c.Name, c.Value)));
+                cookieHeader
+                   .Value
+                   .Split(';')
+                   .Select(c => c.Split('='))
+                   .Select(cp => new
+                   {
+                       Name = cp[0].Trim(),
+                       Value = cp[1].Trim()
+                   })
+                   .ToList()
+                   .ForEach(c => cookieCollection.Add(c.Name, new HttpCookie(c.Name, c.Value)));
             }
 
             return cookieCollection;
@@ -129,13 +148,19 @@ namespace MyWebSurver.Http
         {
             var result = new Dictionary<string, string>();
 
-            if (headers.ContainsKey(HttpHeader.ContentType) 
+            if (headers.ContainsKey(HttpHeader.ContentType)
                 && headers[HttpHeader.ContentType].Value == HttpContentType.FormUtlEncoded)
-            { 
+            {
                 result = ParseQuery(body);
             }
 
             return result;
+        }
+
+        public override string ToString()
+        {
+            //TODO:
+            return null;
         }
 
         private static HttpMethod ParseMethod(string method)

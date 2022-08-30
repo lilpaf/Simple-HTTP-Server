@@ -1,7 +1,6 @@
 ﻿namespace MyWebSurver.Results
 {
     using MyWebSurver.Http;
-    using System.Reflection.PortableExecutable;
 
     public abstract class ActionResult : HttpResponse
     {
