@@ -76,10 +76,15 @@
             }
         }
 
-        
-        private void PrepareSession(HttpRequest request, HttpResponse response)
-        => response.AddCookie(HttpSession.SessionCookieName, request.Session.Id);
 
+        private void PrepareSession(HttpRequest request, HttpResponse response)
+        {
+            if (request.Session.IsNew)
+            {
+                response.AddCookie(HttpSession.SessionCookieName, request.Session.Id);
+                request.Session.IsNew = false;
+            }
+        }
         private async Task HandleError(NetworkStream networkStream, Exception exception)
         {
             var errorMessege = $"{exception.Message}{Environment.NewLine}{exception.StackTrace}";
