@@ -62,7 +62,7 @@
 
                         this.PrepareSession(request, response);
 
-                        this.LogPipeLine(request, response);
+                        this.LogPipeLine(requestText, response.ToString());
 
                         await WriteResponse(networkStream, response);
                     }
@@ -115,7 +115,7 @@
             return requestBuilder.ToString();
         }
 
-        private void LogPipeLine(HttpRequest request, HttpResponse response)
+        private void LogPipeLine(string request, string response)
         {
             var separator = new string('-', 50);
 
@@ -125,12 +125,12 @@
             log.AppendLine(separator);
 
             log.AppendLine("REQUEST:");
-            log.AppendLine(request.ToString());
+            log.AppendLine(request);
             
             log.AppendLine();
 
             log.AppendLine("RESPONSE:");
-            log.AppendLine(response.ToString());
+            log.AppendLine(response);
 
             log.AppendLine();
 

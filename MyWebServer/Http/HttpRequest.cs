@@ -1,4 +1,6 @@
-﻿namespace MyWebSurver.Http
+﻿using System.Text;
+
+namespace MyWebSurver.Http
 {
 
     public class HttpRequest
@@ -155,12 +157,6 @@
             }
 
             return result;
-        }
-
-        public override string ToString()
-        {
-            //TODO:
-            return null;
         }
 
         private static HttpMethod ParseMethod(string method)
