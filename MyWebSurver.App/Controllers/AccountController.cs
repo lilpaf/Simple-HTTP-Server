@@ -9,7 +9,34 @@
         {
         }
 
-        public HttpResponse ActionWithCookies()
+        public HttpResponse Login()
+        {
+
+            var someUserId = "MyUserId"; //should come from the database
+            
+            this.SignIn(someUserId);
+
+            return Text("User authenticated!");
+        }
+        
+        public HttpResponse Logout()
+        {
+            this.SignOut();
+
+            return Text("User signed out!");
+        }
+        
+        public HttpResponse AuthenticationCheck()
+        {
+            if (this.User.IsAuthenticated)
+            {
+                return Text($"Authenticated user: {this.User.Id} ");
+            }
+
+            return Text("User in not authenticated!");
+        }
+
+        public HttpResponse CookiesCheck()
         {
             const string cookieName = "My-Cookie";
 
@@ -26,7 +53,7 @@
             return Text("Cookies set!");
         }
 
-        public HttpResponse ActionWithSession()
+        public HttpResponse SessionCheck()
         {
             const string currentDateKey = "CurrentDate";
 

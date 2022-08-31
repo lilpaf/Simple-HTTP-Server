@@ -27,6 +27,14 @@
 
         public int Count => this.data.Count;
 
+        public void Remove(string key)
+        {
+            if (this.data.ContainsKey(key))
+            {
+                this.data.Remove(key);
+            }
+        }
+
         public bool ContainsKey(string key)
         => this.data.ContainsKey(key);
     }

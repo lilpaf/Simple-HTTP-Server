@@ -46,30 +46,33 @@
             {
                 var connection = await this.listener.AcceptTcpClientAsync();
 
-                var networkStream = connection.GetStream();
-
-                var requestText = await this.ReadRequest(networkStream);
-
-                try
+                _ = Task.Run(async () =>
                 {
-                    Console.WriteLine(requestText);
+                    var networkStream = connection.GetStream();
 
-                    var request = HttpRequest.Parse(requestText);
+                    var requestText = await this.ReadRequest(networkStream);
 
-                    var response = this.routingTable.ExecuteRequest(request);
+                    try
+                    {
+                        Console.WriteLine(requestText);
 
-                    this.PrepareSession(request, response);
+                        var request = HttpRequest.Parse(requestText);
 
-                    this.LogPipeLine(request, response);
+                        var response = this.routingTable.ExecuteRequest(request);
 
-                    await WriteResponse(networkStream, response);
-                }
-                catch (Exception exception)
-                {
-                    await HandleError(networkStream, exception);
-                }
+                        this.PrepareSession(request, response);
 
-                connection.Close();
+                        this.LogPipeLine(request, response);
+
+                        await WriteResponse(networkStream, response);
+                    }
+                    catch (Exception exception)
+                    {
+                        await HandleError(networkStream, exception);
+                    }
+
+                    connection.Close();
+                });
             }
         }
 
