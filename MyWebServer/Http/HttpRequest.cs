@@ -100,7 +100,9 @@
                 var headerName = headerParts[0];
                 var headerValue = headerParts[1].Trim();
 
-                headerCollection.Add(headerName, new HttpHeader(headerName, headerValue));
+                var header = new HttpHeader(headerName, headerValue);
+
+                headerCollection[headerName] = header;
             }
 
             return headerCollection;
@@ -141,7 +143,7 @@
                        Value = cp[1].Trim()
                    })
                    .ToList()
-                   .ForEach(c => cookieCollection.Add(c.Name, new HttpCookie(c.Name, c.Value)));
+                   .ForEach(c => cookieCollection[c.Name] = new HttpCookie(c.Name, c.Value));
             }
 
             return cookieCollection;

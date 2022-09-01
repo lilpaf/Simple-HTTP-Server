@@ -3,9 +3,13 @@
     using MyWebSurver.Http;
     using MyWebSurver.Routing;
     using System;
+    using System.IO;
+    using System.Reflection;
 
     public static class RoutingTableExtensions
     {
+        private static Type httpResponseType = typeof(HttpResponse);
+
         public static IRoutingTable MapGet<TController>(
             this IRoutingTable routingTable,
             string path,
@@ -13,7 +17,7 @@
             where TController : Controller
             => routingTable.MapGet(path,
                 request => contollerFunction(CreateController<TController>(request)));
-          
+
 
         public static IRoutingTable MapPost<TController>(
             this IRoutingTable routingTable,
@@ -23,7 +27,72 @@
          => routingTable.MapPost(path,
                 request => contollerFunction(CreateController<TController>(request)));
 
+        public static IRoutingTable MapControllers(this IRoutingTable routingTable)
+        {
+            var controllersActions = GetControllerActions();
+
+            foreach (var controllerAction in controllersActions)
+            {
+                var controllerName = controllerAction.DeclaringType.GetControllerName();
+                var actionName = controllerAction.Name;
+
+                var path = $"/{controllerName}/{actionName}";
+
+                var responseFunction = GetResponseFunction(controllerAction);
+
+                routingTable.MapGet(path, responseFunction);
+
+                MapDefaultRoutes(routingTable, controllerName, actionName, responseFunction);
+            }
+
+            return routingTable;
+        }
+
+        private static IEnumerable<MethodInfo> GetControllerActions()
+            => Assembly
+            .GetEntryAssembly()
+                .GetExportedTypes()
+                .Where(t => !t.IsAbstract &&
+                t.IsAssignableTo(typeof(Controller))
+                && t.Name.EndsWith(nameof(Controller)))
+                .SelectMany(t => t
+                .GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                .Where(m => m.ReturnType.IsAssignableTo(httpResponseType)))
+                .ToList();
+
+        private static Func<HttpRequest, HttpResponse> GetResponseFunction(MethodInfo controllerAction)
+            => request =>
+            {
+                var controllerIstance = CreateController(controllerAction.DeclaringType, request);
+
+                return (HttpResponse)controllerAction.Invoke(controllerIstance, Array.Empty<object>());
+            };
+
+        private static Controller CreateController(Type controller, HttpRequest request)
+            => (Controller)Activator.CreateInstance(controller, new[] { request });
+        
         private static TController CreateController<TController>(HttpRequest request)
-            => (TController)Activator.CreateInstance(typeof(TController), new[] { request });
+            where TController : Controller
+            => (TController)CreateController(typeof(TController), request);
+
+        private static void MapDefaultRoutes(
+            IRoutingTable routingTable,
+            string controllerName,
+            string actionName,
+            Func<HttpRequest, HttpResponse> responseFunction)
+        {
+            const string defaultActionName = "Index";
+            const string defaultControllerName = "Home";
+
+            if (actionName == defaultActionName)
+            {
+                routingTable.MapGet($"/{controllerName}", responseFunction);
+
+                if (controllerName == defaultControllerName)
+                {
+                    routingTable.MapGet("/", responseFunction);
+                }
+            }
+        }
     }
 }
