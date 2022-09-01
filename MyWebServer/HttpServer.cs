@@ -147,6 +147,11 @@
             var responseBites = Encoding.UTF8.GetBytes(response.ToString());
 
             await networkStream.WriteAsync(responseBites);
+
+            if (response.HasContent)
+            {
+                await networkStream.WriteAsync(response.Content);
+            }
         }
     }
 }

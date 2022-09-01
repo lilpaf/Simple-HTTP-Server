@@ -2,10 +2,14 @@
 using MyWebSurver.App.Controllers;
 using MyWebSurver.Controllers;
 
+// Browsers like safari and chrome don't display favicon if it is local like ours!
+
 await new HttpServer(routes => routes
+    .MapStaticFiles()
     .MapGet<HomeController>("/", c => c.Index())
     .MapGet<HomeController>("/Softuni", c => c.ToSoftUni())
     .MapGet<HomeController>("/Error", c => c.Error())
+    .MapGet<HomeController>("/StaticFiles", c => c.StaticFiles())
     .MapGet<HomeController>("/ToCats", c => c.LocalRedirect())
     .MapGet<AnimalsController>("/Cats", c => c.Cats())
     .MapGet<AnimalsController>("/Dogs", c => c.Dogs())

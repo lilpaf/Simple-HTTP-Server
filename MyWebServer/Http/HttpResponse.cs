@@ -19,13 +19,41 @@
 
         public IDictionary<string, HttpCookie> Cookies { get; } = new Dictionary<string, HttpCookie>();
 
-        public string Content { get; protected set; }
+        public byte[] Content { get; protected set; }
+
+        public bool HasContent => this.Content != null && this.Content.Any();
 
         public static HttpResponse ForError(string messege)
             => new HttpResponse(HttpStatusCode.InternalServerError)
-            {
-                Content = messege
-            };
+            .SetContent(messege, HttpContentType.PlainText);
+
+        public HttpResponse SetContent(string content, string contentType)
+        {
+            Guard.AgainstNull(content, nameof(content));
+            Guard.AgainstNull(contentType, nameof(contentType));
+
+            var contentLength = Encoding.UTF8.GetByteCount(content).ToString();
+
+            this.AddHeader(HttpHeader.ContentType, contentType);
+            this.AddHeader(HttpHeader.ContentLength, contentLength);
+
+            this.Content = Encoding.UTF8.GetBytes(content);
+
+            return this;
+        }
+        
+        public HttpResponse SetContent(byte[] content, string contentType)
+        {
+            Guard.AgainstNull(content, nameof(content));
+            Guard.AgainstNull(contentType, nameof(contentType));
+
+            this.AddHeader(HttpHeader.ContentType, contentType);
+            this.AddHeader(HttpHeader.ContentLength, content.Length.ToString());
+
+            this.Content = content;
+
+            return this;
+        }
 
         public void AddHeader(string name, string value)
         {
@@ -59,27 +87,12 @@
                 result.AppendLine($"{HttpHeader.SetCookie}: {cookie}");
             }
 
-            if (!string.IsNullOrEmpty(this.Content))
+            if (this.HasContent)
             {
                 result.AppendLine();
-
-                result.Append(this.Content);
             }
 
             return result.ToString();
-        }
-
-        protected void PrepareContent(string content, string contentType)
-        {
-            Guard.AgainstNull(content, nameof(content));
-            Guard.AgainstNull(contentType, nameof(contentType));
-
-            var contentLength = Encoding.UTF8.GetByteCount(content).ToString();
-
-            this.AddHeader(HttpHeader.ContentType, contentType);
-            this.AddHeader(HttpHeader.ContentLength, contentLength);
-
-            this.Content = content;
         }
     }
 }

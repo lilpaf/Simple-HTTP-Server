@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="HttpServer.cs~RFb2f1566.TMP" />
+  </ItemGroup>
+
 </Project>

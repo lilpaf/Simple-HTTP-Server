@@ -1,11 +1,12 @@
-﻿using MyWebSurver.Http;
+﻿using MyWebSurver.Common;
+using MyWebSurver.Http;
 using HttpMethod = MyWebSurver.Http.HttpMethod;
 
 namespace MyWebSurver.Routing
 {
     public interface IRoutingTable
     {
-        //void Map(string url, HttpResponse response);
+        IRoutingTable MapStaticFiles(string folder = Settings.StaticFilesRootFolder);
 
         IRoutingTable Map(HttpMethod method, string path, HttpResponse response);
         

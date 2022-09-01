@@ -6,7 +6,7 @@
     {
         public ContentResult(HttpResponse response, string content, string contentType) 
             : base(response) 
-            =>PrepareContent(content, contentType);
+            =>SetContent(content, contentType);
         
     }
 }
