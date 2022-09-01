@@ -35,6 +35,11 @@
 
             return Text("User in not authenticated!");
         }
+        
+        [Authorize]
+        public HttpResponse AuthorisationCheck()
+            => Text($"Current user: {this.User.Id}");
+        
 
         public HttpResponse CookiesCheck()
         {

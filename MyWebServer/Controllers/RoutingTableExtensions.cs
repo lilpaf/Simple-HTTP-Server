@@ -3,7 +3,6 @@
     using MyWebSurver.Http;
     using MyWebSurver.Routing;
     using System;
-    using System.IO;
     using System.Reflection;
 
     public static class RoutingTableExtensions
@@ -40,9 +39,19 @@
 
                 var responseFunction = GetResponseFunction(controllerAction);
 
-                routingTable.MapGet(path, responseFunction);
+                var httpMethod = HttpMethod.Get;
 
-                MapDefaultRoutes(routingTable, controllerName, actionName, responseFunction);
+                var httpMethodAttribute = controllerAction
+                    .GetCustomAttribute<HttpMethodAtribute>();
+
+                if (httpMethodAttribute != null)
+                {
+                    httpMethod = httpMethodAttribute.HttpMethod;
+                }
+
+                routingTable.Map(httpMethod, path, responseFunction);
+
+                MapDefaultRoutes(routingTable, httpMethod, controllerName, actionName, responseFunction);
             }
 
             return routingTable;
@@ -63,6 +72,11 @@
         private static Func<HttpRequest, HttpResponse> GetResponseFunction(MethodInfo controllerAction)
             => request =>
             {
+                if (!UserIsAuthorise(controllerAction, request.Session))
+                {
+                    return new HttpResponse(HttpStatusCode.Unauthorized);
+                }
+
                 var controllerIstance = CreateController(controllerAction.DeclaringType, request);
 
                 return (HttpResponse)controllerAction.Invoke(controllerIstance, Array.Empty<object>());
@@ -70,13 +84,14 @@
 
         private static Controller CreateController(Type controller, HttpRequest request)
             => (Controller)Activator.CreateInstance(controller, new[] { request });
-        
+
         private static TController CreateController<TController>(HttpRequest request)
             where TController : Controller
             => (TController)CreateController(typeof(TController), request);
 
         private static void MapDefaultRoutes(
             IRoutingTable routingTable,
+            HttpMethod httpMethod,
             string controllerName,
             string actionName,
             Func<HttpRequest, HttpResponse> responseFunction)
@@ -86,13 +101,37 @@
 
             if (actionName == defaultActionName)
             {
-                routingTable.MapGet($"/{controllerName}", responseFunction);
+                routingTable.Map(httpMethod, $"/{controllerName}", responseFunction);
 
                 if (controllerName == defaultControllerName)
                 {
-                    routingTable.MapGet("/", responseFunction);
+                    routingTable.Map(httpMethod, "/", responseFunction);
                 }
             }
+        }
+
+        private static bool UserIsAuthorise(
+            MethodInfo controllerAction,
+            HttpSession session)
+        {
+            var authorisationRequired = controllerAction
+                .DeclaringType
+                .GetCustomAttribute<AuthorizeAttribute>()
+                ?? controllerAction
+                .GetCustomAttribute<AuthorizeAttribute>();
+
+            if (authorisationRequired != null)
+            {
+                var userIsAuthorised = session.ContainsKey(Controller.UserSessionKey)
+                && session[Controller.UserSessionKey] != null;
+
+                if (!userIsAuthorised)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
