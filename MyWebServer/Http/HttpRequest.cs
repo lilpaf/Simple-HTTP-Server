@@ -8,8 +8,6 @@
     {
         private static Dictionary<string, HttpSession> Sessions = new();
 
-        private const string NewLine = "\r\n"; //Environment.NewLine
-
         public HttpMethod Method { get; private set; }
 
         public string Path { get; private set; }
@@ -28,7 +26,7 @@
 
         public static HttpRequest Parse(string request)
         {
-            var lines = request.Split(NewLine);
+            var lines = request.Split(Environment.NewLine);
 
             var startLine = lines.First().Split(" ");
 
@@ -45,7 +43,7 @@
 
             var bodyLines = lines.Skip(headers.Count + 2).ToArray();
 
-            var body = string.Join(NewLine, bodyLines);
+            var body = string.Join(Environment.NewLine, bodyLines);
 
             var form = ParseForm(headers, body);
 
