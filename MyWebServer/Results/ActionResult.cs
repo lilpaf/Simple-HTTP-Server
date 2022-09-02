@@ -1,6 +1,8 @@
 ﻿namespace MyWebSurver.Results
 {
     using MyWebSurver.Http;
+    using MyWebServer.Http.Collections;
+    using MyWebSurver.Http.Collections;
 
     public abstract class ActionResult : HttpResponse
     {
@@ -14,19 +16,19 @@
 
         protected HttpResponse Response { get; private init; }
 
-        private void PrepareHeaders(IDictionary<string, HttpHeader> headers)
+        private void PrepareHeaders(HeaderCollection headers)
         {
-            foreach (var header in headers.Values)
+            foreach (var header in headers)
             {
-                this.AddHeader(header.Name, header.Value);
+                this.Headers.Add(header.Name, header.Value);
             }
         }
 
-        private void PrapareCookies(IDictionary<string, HttpCookie> cookies)
+        private void PrapareCookies(CookieCollection cookies)
         {
-            foreach (var cookie in cookies.Values)
+            foreach (var cookie in cookies)
             {
-                this.AddCookie(cookie.Name, cookie.Value);
+                this.Cookies.Add(cookie.Name, cookie.Value);
             }
         }
     }
