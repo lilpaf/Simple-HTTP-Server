@@ -33,6 +33,15 @@
                 viewContent = this.PopulateModel(viewContent, model);
             }
 
+            var layoutPath = Path.GetFullPath("./Views/Layout.cshtml");
+
+            if (File.Exists(layoutPath))
+            {
+                var layoutContent = File.ReadAllText(layoutPath);
+
+                viewContent = layoutContent.Replace("@Renderbody()", viewContent);
+            }
+
             this.SetContent(viewContent, HttpContentType.Html);
         }
 
@@ -56,7 +65,7 @@
 
             foreach (var entry in data)
             {
-                viewContent = viewContent.Replace($"{{{{{entry.Name}}}}}", entry.Value.ToString());
+                viewContent = viewContent.Replace($"@Model.{entry.Name}", entry.Value.ToString());
             }
 
             return viewContent;
