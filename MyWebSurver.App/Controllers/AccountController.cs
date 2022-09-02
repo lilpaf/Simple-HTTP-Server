@@ -5,13 +5,9 @@
 
     public class AccountController : Controller
     {
-        public AccountController(HttpRequest request) : base(request)
-        {
-        }
-
+        
         public HttpResponse Login()
         {
-
             var someUserId = "MyUserId"; //should come from the database
             
             this.SignIn(someUserId);
