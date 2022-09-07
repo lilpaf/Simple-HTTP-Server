@@ -58,7 +58,7 @@
         {
             const string currentDateKey = "CurrentDate";
 
-            if (this.Request.Session.ContainsKey(currentDateKey))
+            if (this.Request.Session.Contains(currentDateKey))
             {
                 var currentDate = this.Request.Session[currentDateKey];
 

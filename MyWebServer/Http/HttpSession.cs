@@ -37,7 +37,7 @@
             }
         }
 
-        public bool ContainsKey(string key)
+        public bool Contains(string key)
         => this.data.ContainsKey(key);
     }
 }

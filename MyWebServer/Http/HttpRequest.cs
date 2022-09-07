@@ -3,6 +3,7 @@
     using System.Web;
     using MyWebServer.Http.Collections;
     using MyWebSurver.Http.Collections;
+    using MyWebSurver.Services;
 
     public class HttpRequest
     {
@@ -23,8 +24,10 @@
         public string Body { get; private set; }
 
         public HttpSession Session { get; private set; }
+        
+        public ServiceCollection Services { get; private set; }
 
-        public static HttpRequest Parse(string request)
+        public static HttpRequest Parse(string request, ServiceCollection services)
         {
             var lines = request.Split(Environment.NewLine);
 
@@ -57,6 +60,7 @@
                 Session = session,
                 Body = body,
                 Form = form,
+                Services = services,
             };
         }
 

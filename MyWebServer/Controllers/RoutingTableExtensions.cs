@@ -91,7 +91,7 @@
 
         private static Controller CreateController(Type controllerType, HttpRequest request)
         {
-            var controller = (Controller)Activator.CreateInstance(controllerType);
+            var controller = (Controller)request.Services.CreateInstance(controllerType);
 
             controllerType.GetProperty("Request", BindingFlags.Instance | BindingFlags.NonPublic)
                 .SetValue(controller, request);
@@ -133,7 +133,7 @@
 
             if (authorisationRequired != null)
             {
-                var userIsAuthorised = session.ContainsKey(Controller.UserSessionKey)
+                var userIsAuthorised = session.Contains(Controller.UserSessionKey)
                 && session[Controller.UserSessionKey] != null;
 
                 if (!userIsAuthorised)
