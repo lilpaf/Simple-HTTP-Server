@@ -1,15 +1,18 @@
 ﻿namespace MyWebSurver.Results
 {
     using MyWebSurver.Http;
+    using System.Collections;
+    using System.Reflection;
+    using System.Text;
 
     public class ViewResult : ActionResult
     {
         private const char PathSeparator = '/';
 
-        public ViewResult(HttpResponse respose, string viewPath, string controllerName, object model) 
+        public ViewResult(HttpResponse respose, string viewPath, string controllerName, object model)
             : base(respose)
-        =>this.GetHtml(viewPath, controllerName, model);
-        
+        => this.GetHtml(viewPath, controllerName, model);
+
 
         private void GetHtml(string viewName, string controllerName, object model)
         {
@@ -28,11 +31,6 @@
 
             var viewContent = File.ReadAllText(viewPath);
 
-            if(model != null)
-            {
-                viewContent = this.PopulateModel(viewContent, model);
-            }
-
             var layoutPath = Path.GetFullPath("./Views/Layout.cshtml");
 
             if (File.Exists(layoutPath))
@@ -40,6 +38,11 @@
                 var layoutContent = File.ReadAllText(layoutPath);
 
                 viewContent = layoutContent.Replace("@Renderbody()", viewContent);
+            }
+
+            if (model != null)
+            {
+                viewContent = PopulateModel(viewContent, model);
             }
 
             this.SetContent(viewContent, HttpContentType.Html);
@@ -54,21 +57,98 @@
             this.SetContent(errorMesege, HttpContentType.PlainText);
         }
 
-        private string PopulateModel(string viewContent, object model)
+        private static string PopulateModel(string viewContent, object model)
         {
-            var data = model.GetType().GetProperties()
-                .Select(pr => new
-                {
-                    Name = pr.Name,
-                    Value = pr.GetValue(model)
-                });
-
-            foreach (var entry in data)
+            if (model is not IEnumerable)
             {
-                viewContent = viewContent.Replace($"@Model.{entry.Name}", entry.Value.ToString());
+                viewContent = PopulateModelProperties(viewContent, "Model", model);
             }
 
-            return viewContent;
+            var result = new StringBuilder();
+
+            var lines = viewContent
+                .Split(Environment.NewLine)
+                .Select(line => line.Trim());
+
+            var inLoop = false;
+            string loopModelName = null;
+            StringBuilder loopContent = null;
+
+            foreach (var line in lines)
+            {
+                if (line.StartsWith("@foreach"))
+                {
+                    if (model is not IEnumerable)
+                    {
+                        throw new InvalidOperationException("Using a foreach in loop requires the view model to be a collection");
+                    }
+
+                    inLoop = true;
+
+                    loopModelName = line
+                        .Split()
+                        .SkipWhile(l => l.Contains("var"))
+                        .Skip(2)
+                        .FirstOrDefault();
+
+                    if (loopModelName == null)
+                    {
+                        throw new InvalidOperationException("The foreach statement in the view is not valid");
+                    }
+
+                    continue;
+                }
+
+                if (inLoop)
+                {
+                    if (line.StartsWith("{"))
+                    {
+                        loopContent = new StringBuilder();
+                    }
+                    else if (line.StartsWith("}"))
+                    {
+                        var loopTemplate = loopContent.ToString();
+
+                        foreach (var item in (IEnumerable)model)
+                        {
+                            var loopResult = PopulateModelProperties(loopTemplate, loopModelName, item);
+
+                            result.AppendLine(loopResult);
+                        }
+
+                        inLoop = false;
+                    }
+                    else
+                    {
+                        loopContent.AppendLine(line);
+                    }
+
+                    continue;
+                }
+
+                result.AppendLine(line);
+            }
+
+            return result.ToString();
+        }
+
+        private static string PopulateModelProperties(string content, string modelName, object model)
+        {
+                var data = model
+                    .GetType()
+                    .GetProperties()
+                    .Select(pr => new
+                    {
+                        Name = pr.Name,
+                        Value = pr.GetValue(model)
+                    });
+
+                foreach (var entry in data)
+                {
+                    content = content.Replace($"@{modelName}.{entry.Name}", entry.Value.ToString());
+                }
+
+                return content;
         }
     }
 }

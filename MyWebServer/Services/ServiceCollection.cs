@@ -18,6 +18,10 @@ namespace MyWebSurver.Services
             return this;
         }
 
+        public IServiceCollection Add<TService>()
+            where TService : class
+           => this.Add<TService, TService>();
+
         public TService Get<TService>()
             where TService : class
         {
